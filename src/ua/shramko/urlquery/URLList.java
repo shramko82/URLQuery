@@ -1,21 +1,39 @@
 package ua.shramko.urlquery;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class URLList {
-  private List<URL> urlList;
-  private int count;
+  private List<URLwithState> urlList = new ArrayList<URLwithState>();
 
-  public URLList(List<URL> urlList) {
-    this.urlList = urlList;
+  public URLList(List<URL> list) {
+    for (URL url : list) {
+      urlList.add(new URLwithState(url));
+    }
   }
   
-  public synchronized URL getItem() {
-    if (count < urlList.size()) {
-      return urlList.get(count++);
-    } else {
-      return null;
+  public synchronized URLwithState getItem() {
+    URLwithState result = null;
+    for (URLwithState url : urlList) {
+      if (url.state == URLStates.OPEN) {
+        result = url;
+        url.state = URLStates.CHECKING;
+        break;
+      }
     }
+    return result;
+  }
+
+  public boolean checkEnd() {
+    boolean result = true;
+    for (URLwithState url : urlList) {
+      if (url.state != URLStates.BROKEN) {
+        result = false;
+        break;
+      }
+    }
+    
+    return result;
   } 
 }

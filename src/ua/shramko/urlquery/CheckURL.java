@@ -2,7 +2,6 @@ package ua.shramko.urlquery;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 
 public class CheckURL extends Thread {
 
@@ -17,28 +16,26 @@ public class CheckURL extends Thread {
   public void run() {
     while (true) {
       try {
-        URL urlFromList = urlList.getItem();
+        URLwithState urlFromList = urlList.getItem();
         boolean finish = requestResult.getResultURL() != null
             || urlFromList == null;
         if (finish) {
           break;
         }
-        HttpURLConnection urlConnection = (HttpURLConnection) urlFromList
+        HttpURLConnection urlConnection = (HttpURLConnection) urlFromList.url
             .openConnection();
         urlConnection.setRequestMethod("HEAD");
         urlConnection.connect();
         int responseCode = urlConnection.getResponseCode();
         if (responseCode == 200) {
-          requestResult.setResultURL(urlFromList);
+          requestResult.setResultURL(urlFromList.url);
           break;
+        } else {
+          urlFromList.state = URLStates.BROKEN;
         }
-        sleep(1000);
       } catch (IOException e) {
-        e.printStackTrace();
-      } catch (InterruptedException e) {
         e.printStackTrace();
       }
     }
   }
-
 }
